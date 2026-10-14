@@ -1,7 +1,7 @@
 import 'package:ecommerce_app_huma_volve/core/network/api_client.dart';
 import 'package:ecommerce_app_huma_volve/core/constants/api_endpoints.dart';
 import 'package:ecommerce_app_huma_volve/core/storage/secure_storage.dart';
-import 'package:ecommerce_app_huma_volve/features/auth/login/model/login_model.dart';
+import 'package:ecommerce_app_huma_volve/features/auth/login/data/model/login_model.dart';
 
 class LoginService {
   ApiClient apiClient;

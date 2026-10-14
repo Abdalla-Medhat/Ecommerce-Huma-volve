@@ -29,9 +29,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   late final HomeRepository homeRepository;
   late final HomeRemoteDataSource homeRemoteDataSource;
   late final ApiClient apiClient;
+
   @override
   void initState() {
     super.initState();
+
     apiClient = ApiClient();
     homeRemoteDataSource = HomeRemoteDataSourceImp(apiClient);
     homeRepository = HomeRepositoryImp(homeRemoteDataSource);

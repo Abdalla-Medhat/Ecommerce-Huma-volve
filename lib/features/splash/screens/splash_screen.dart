@@ -1,9 +1,17 @@
+import 'package:ecommerce_app_huma_volve/core/network/api_client.dart';
 import 'package:ecommerce_app_huma_volve/core/storage/secure_storage.dart';
+import 'package:ecommerce_app_huma_volve/features/auth/login/data/data_source/login_remote_data_source.dart';
+import 'package:ecommerce_app_huma_volve/features/auth/login/data/data_source/login_remote_data_source_imp.dart';
+import 'package:ecommerce_app_huma_volve/features/auth/login/data/repository/repository_imp.dart';
+import 'package:ecommerce_app_huma_volve/features/auth/login/domain/repository/login_repository.dart';
+import 'package:ecommerce_app_huma_volve/features/auth/login/domain/use_cases/login_use_case.dart';
+import 'package:ecommerce_app_huma_volve/features/auth/login/presentation/view_model/login_cubit.dart';
 import 'package:ecommerce_app_huma_volve/features/main_navigation/screens/main_navigation_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/theme.dart';
-import '../../auth/login/screens/login_screen.dart';
+import '../../auth/login/presentation/view/login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,9 +21,23 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  late final LoginCubit loginCubit;
+  late final LoginUseCase loginUseCase;
+  late final LoginRepository loginRepository;
+  late final LoginRemoteDataSource loginRemoteDataSource;
+  late final ApiClient apiClient;
   @override
   void initState() {
     super.initState();
+    apiClient = ApiClient();
+
+    loginRemoteDataSource = LoginRemoteDataSourceImp(apiClient);
+    loginRepository = RepositoryImp(
+      loginRemoteDataSource: loginRemoteDataSource,
+    );
+    loginUseCase = LoginUseCase(loginRepository);
+    loginCubit = LoginCubit(loginUseCase);
+
     _navigateToNext();
   }
 
@@ -44,7 +66,11 @@ class _SplashScreenState extends State<SplashScreen> {
           context,
           PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) =>
-                const LoginScreen(),
+                BlocProvider(
+                  create: (context) => loginCubit,
+                  child: const LoginScreen(),
+                ),
+
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) {
                   return FadeTransition(opacity: animation, child: child);

@@ -1,70 +1,53 @@
 import 'package:dio/dio.dart';
 import 'package:ecommerce_app_huma_volve/core/network/api_client.dart';
-import 'package:ecommerce_app_huma_volve/features/auth/login/services/login_service.dart';
+import 'package:ecommerce_app_huma_volve/features/auth/login/data/data_source/login_remote_data_source_imp.dart';
+import 'package:ecommerce_app_huma_volve/features/auth/login/data/repository/repository_imp.dart';
+import 'package:ecommerce_app_huma_volve/features/auth/login/domain/use_cases/login_use_case.dart';
+import 'package:ecommerce_app_huma_volve/features/auth/login/presentation/view_model/login_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/widgets/custom_text_field.dart';
-import '../../../../core/widgets/primary_button.dart';
-import '../../../../core/theme.dart';
-import '../../../main_navigation/screens/main_navigation_screen.dart';
-import '../../sign_up/screens/sign_up_screen.dart';
+import '../../../../../core/widgets/custom_text_field.dart';
+import '../../../../../core/widgets/primary_button.dart';
+import '../../../../../core/theme.dart';
+import '../../../../main_navigation/screens/main_navigation_screen.dart';
+import '../../../sign_up/screens/sign_up_screen.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => LoginCubit(
+        LoginUseCase(
+          RepositoryImp(
+            loginRemoteDataSource: LoginRemoteDataSourceImp(ApiClient()),
+          ),
+        ),
+      ),
+      child: const LoginScreenBody(),
+    );
+  }
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class LoginScreenBody extends StatefulWidget {
+  const LoginScreenBody({super.key});
+
+  @override
+  State<LoginScreenBody> createState() => _LoginScreenBodyState();
+}
+
+class _LoginScreenBodyState extends State<LoginScreenBody> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController emailController;
   late final TextEditingController passwordController;
-  late ApiClient apiClient;
-  late LoginService loginService;
-  bool isLoading = false;
-
-  Future<void> _login() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      setState(() {
-        isLoading = true;
-      });
-      try {
-        final response = await loginService.login(
-          emailController.text.trim(),
-          passwordController.text.trim(),
-        );
-        // Test the response data
-        debugPrint("===================");
-        debugPrint('Access Token: ${response.accessToken}');
-        debugPrint('Refresh Token: ${response.refreshToken}');
-        debugPrint("===================");
-        setState(() {
-          isLoading = false;
-        });
-        if (!context.mounted) return;
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => MainNavigationScreen()),
-        );
-      } on DioException catch (e) {
-        setState(() {
-          isLoading = false;
-        });
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.toString())));
-      }
-    }
-  }
 
   @override
   void initState() {
+    super.initState();
     emailController = TextEditingController();
     passwordController = TextEditingController();
-    apiClient = ApiClient();
-    loginService = LoginService(apiClient);
-
-    super.initState();
   }
 
   @override
@@ -146,10 +129,39 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-                PrimaryButton(
-                  isLoading: isLoading,
-                  text: 'Login',
-                  onPressed: _login,
+                BlocConsumer<LoginCubit, LoginStates>(
+                  listener: (context, state) {
+                    if (state is LoginError) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.message.toString()),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                    if (state is LoginSuccess) {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const MainNavigationScreen(),
+                        ),
+                      );
+                    }
+                  },
+                  builder: (context, state) {
+                    final bool isLoading = state is LoginLoading;
+                    return PrimaryButton(
+                      isLoading: isLoading,
+                      text: 'Login',
+                      onPressed: () {
+                        if (_formKey.currentState?.validate() ?? false) {
+                          context.read<LoginCubit>().loadData(
+                            emailController.text.trim(),
+                            passwordController.text.trim(),
+                          );
+                        }
+                      },
+                    );
+                  },
                 ),
                 const SizedBox(height: 24),
                 Row(
