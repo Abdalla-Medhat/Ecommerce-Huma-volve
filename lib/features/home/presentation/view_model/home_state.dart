@@ -12,7 +12,7 @@ class HomeInitial extends HomeState {}
 class CategoriesLoading extends HomeState {}
 
 class CategoriesSuccess extends HomeState {
-  final List<CategoryModel> categories;
+  final List<HomeCategoryEntity> categories;
   const CategoriesSuccess(this.categories);
   @override
   List<Object> get props => [categories];
@@ -28,7 +28,7 @@ class CategoriesError extends HomeState {
 class ProductsLoading extends HomeState {}
 
 class ProductsSuccess extends HomeState {
-  final List<ProductModel> products;
+  final List<HomeProductEntity> products;
   const ProductsSuccess(this.products);
   @override
   List<Object> get props => [products];

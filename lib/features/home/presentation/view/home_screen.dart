@@ -1,12 +1,12 @@
-import 'package:ecommerce_app_huma_volve/features/home/cubit/home_cubit.dart';
-import 'package:ecommerce_app_huma_volve/features/home/services/models/category_model.dart';
-import 'package:ecommerce_app_huma_volve/features/home/services/models/product_model.dart';
+import 'package:ecommerce_app_huma_volve/features/home/domain/entites/home_category_entity.dart';
+import 'package:ecommerce_app_huma_volve/features/home/domain/entites/home_product_entity.dart';
+import 'package:ecommerce_app_huma_volve/features/home/presentation/view_model/home_cubit.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/dummy_data.dart';
-import '../../../core/theme.dart';
-import 'widgets/product_card.dart';
+import '../../../../core/dummy_data.dart';
+import '../../../../core/theme.dart';
 import 'widgets/category_chip.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -130,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         } else if (state is CategoriesError) {
                           return Text(state.message);
                         } else if (state is CategoriesSuccess) {
-                          final List<CategoryModel> categories =
+                          final List<HomeCategoryEntity> categories =
                               state.categories;
                           return SizedBox(
                             height: 44,
@@ -141,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   const SizedBox(width: 12),
                               itemBuilder: (context, index) {
                                 return CategoryChip(
-                                  label: categories[index].name ?? "All",
+                                  label: categories[index].name,
                                   isSelected: _selectedCategoryIndex == index,
                                   onTap: () {
                                     setState(() {
@@ -186,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   );
                 } else if (state is ProductsSuccess) {
-                  final List<ProductModel> products = state.products;
+                  final List<HomeProductEntity> products = state.products;
                   return SliverPadding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     sliver: SliverGrid(
@@ -213,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Column(
                                 children: [
                                   Text(
-                                    products[index].title!,
+                                    products[index].title,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(color: Colors.white),
@@ -241,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(20),
                               child: Image.network(
-                                products[index].images![0],
+                                products[index].images[0],
                                 fit: BoxFit.cover,
                               ),
                             ),

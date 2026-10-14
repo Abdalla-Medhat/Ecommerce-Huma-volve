@@ -1,11 +1,16 @@
 import 'package:ecommerce_app_huma_volve/core/network/api_client.dart';
-import 'package:ecommerce_app_huma_volve/features/home/cubit/home_cubit.dart';
-import 'package:ecommerce_app_huma_volve/features/home/services/home_service.dart';
+import 'package:ecommerce_app_huma_volve/features/home/data/data_source/home_remote_data_source.dart';
+import 'package:ecommerce_app_huma_volve/features/home/data/data_source/home_remote_data_source_imp.dart';
+import 'package:ecommerce_app_huma_volve/features/home/data/repository/home_repository_imp.dart';
+import 'package:ecommerce_app_huma_volve/features/home/domain/repository/home_repository.dart';
+import 'package:ecommerce_app_huma_volve/features/home/domain/use_cases/get_categories_use_case.dart';
+import 'package:ecommerce_app_huma_volve/features/home/domain/use_cases/get_product_use_case.dart';
+import 'package:ecommerce_app_huma_volve/features/home/presentation/view_model/home_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/theme.dart';
-import '../../home/screens/home_screen.dart';
+import '../../home/presentation/view/home_screen.dart';
 import '../../cart/screens/cart_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 
@@ -19,15 +24,23 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
   late final HomeCubit homeCubit;
-  late final HomeService homeService;
+  late final GetCategoriesUseCase getCategoriesUseCase;
+  late final GetProductUseCase getProductsByCategory;
+  late final HomeRepository homeRepository;
+  late final HomeRemoteDataSource homeRemoteDataSource;
   late final ApiClient apiClient;
-
   @override
   void initState() {
     super.initState();
     apiClient = ApiClient();
-    homeService = HomeService(apiClient);
-    homeCubit = HomeCubit(homeService);
+    homeRemoteDataSource = HomeRemoteDataSourceImp(apiClient);
+    homeRepository = HomeRepositoryImp(homeRemoteDataSource);
+    getCategoriesUseCase = GetCategoriesUseCase(homeRepository);
+    getProductsByCategory = GetProductUseCase(homeRepository);
+    homeCubit = HomeCubit(
+      getCategoriesUseCase: getCategoriesUseCase,
+      getProductsByCategoryUseCase: getProductsByCategory,
+    );
   }
 
   @override
