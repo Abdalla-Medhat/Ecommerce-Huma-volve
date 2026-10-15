@@ -40,3 +40,12 @@ class ProductsError extends HomeState {
   @override
   List<Object> get props => [message];
 }
+
+class LoadingMoreProducts extends HomeState {}
+
+class LoadingMoreProductsError extends HomeState {
+  final String message;
+  const LoadingMoreProductsError(this.message);
+  @override
+  List<Object> get props => [message];
+}

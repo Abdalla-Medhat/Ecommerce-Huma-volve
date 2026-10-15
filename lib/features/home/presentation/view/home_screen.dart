@@ -18,11 +18,30 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedCategoryIndex = 0;
+  late final ScrollController _scrollController;
+
+  void _onListener() {
+    double currentPosition = _scrollController.position.pixels;
+    double maxPosition = _scrollController.position.maxScrollExtent;
+    print("currentPosition: $currentPosition, maxPosition: $maxPosition");
+    final int apiTrigger = 200;
+    if (currentPosition >= maxPosition - apiTrigger) {
+      context.read<HomeCubit>().loadMoreProducts();
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onListener);
     context.read<HomeCubit>().loadHomeData();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -31,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppTheme.background,
       body: SafeArea(
         child: CustomScrollView(
+          controller: _scrollController,
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
@@ -167,26 +187,38 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             BlocBuilder<HomeCubit, HomeState>(
+              buildWhen: (previous, current) {
+                return current is ProductsLoading ||
+                    current is ProductsSuccess ||
+                    current is ProductsError;
+              },
               builder: (context, state) {
-                if (state is ProductsLoading) {
+                final products = state is ProductsSuccess
+                    ? state.products
+                    : context.read<HomeCubit>().products;
+
+                if (state is ProductsLoading && products.isEmpty) {
                   return const SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.all(50.0),
+                      padding: EdgeInsets.all(50),
                       child: Center(child: CircularProgressIndicator()),
                     ),
                   );
-                } else if (state is ProductsError) {
+                }
+
+                if (state is ProductsError) {
                   return SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.all(24.0),
+                      padding: const EdgeInsets.all(24),
                       child: Text(
                         state.message,
-                        style: TextStyle(color: Colors.red),
+                        style: const TextStyle(color: Colors.red),
                       ),
                     ),
                   );
-                } else if (state is ProductsSuccess) {
-                  final List<HomeProductEntity> products = state.products;
+                }
+
+                if (products.isNotEmpty) {
                   return SliverPadding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     sliver: SliverGrid(
@@ -200,16 +232,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       delegate: SliverChildBuilderDelegate((context, index) {
                         return GridTile(
                           footer: Container(
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               borderRadius: BorderRadius.only(
                                 bottomLeft: Radius.circular(20),
                                 bottomRight: Radius.circular(20),
                               ),
                               color: Colors.black45,
                             ),
-
                             child: Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(8),
                               child: Column(
                                 children: [
                                   Text(
@@ -219,7 +250,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     style: const TextStyle(color: Colors.white),
                                   ),
                                   Text(
-                                    "Price: \$${products[index].price}",
+                                    'Price: \$${products[index].price}',
                                     style: const TextStyle(color: Colors.white),
                                   ),
                                 ],
@@ -250,9 +281,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       }, childCount: products.length),
                     ),
                   );
-                } else {
-                  return const SliverToBoxAdapter(child: SizedBox.shrink());
                 }
+
+                return const SliverToBoxAdapter(child: SizedBox.shrink());
               },
             ),
           ],
