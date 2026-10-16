@@ -69,7 +69,7 @@ class HomeCubit extends Cubit<HomeState> {
     if (_isloadingMore || !_hasMore) return;
 
     _isloadingMore = true;
-    emit(ProductsLoading());
+    emit(LoadingMoreProducts());
 
     final newProducts = await getProductsByCategoryUseCase.invoke(
       categoryId,
@@ -78,6 +78,7 @@ class HomeCubit extends Cubit<HomeState> {
     );
     newProducts.fold(
       (failure) {
+        _isloadingMore = false;
         emit(ProductsError(failure.failureMessage));
       },
       (newProducts) {
@@ -86,6 +87,7 @@ class HomeCubit extends Cubit<HomeState> {
         if (newProducts.length < _limit) {
           _hasMore = false;
         }
+        _isloadingMore = false;
         emit(ProductsSuccess(List.from(_products)));
       },
     );

@@ -1,3 +1,4 @@
+import 'package:ecommerce_app_huma_volve/features/details/presentation/view/screens/product_details_screen.dart';
 import 'package:ecommerce_app_huma_volve/features/home/domain/entites/home_category_entity.dart';
 import 'package:ecommerce_app_huma_volve/features/home/domain/entites/home_product_entity.dart';
 import 'package:ecommerce_app_huma_volve/features/home/presentation/view_model/home_cubit.dart';
@@ -146,9 +147,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                       builder: (context, state) {
                         if (state is CategoriesLoading) {
-                          return const CircularProgressIndicator();
+                          return Center(
+                            child: const CircularProgressIndicator(),
+                          );
                         } else if (state is CategoriesError) {
-                          return Text(state.message);
+                          return Center(child: Text(state.message));
                         } else if (state is CategoriesSuccess) {
                           final List<HomeCategoryEntity> categories =
                               state.categories;
@@ -210,9 +213,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   return SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.all(24),
-                      child: Text(
-                        state.message,
-                        style: const TextStyle(color: Colors.red),
+                      child: Center(
+                        child: Text(
+                          state.message,
+                          style: const TextStyle(color: Colors.red),
+                        ),
                       ),
                     ),
                   );
@@ -230,50 +235,65 @@ class _HomeScreenState extends State<HomeScreen> {
                             mainAxisSpacing: 16,
                           ),
                       delegate: SliverChildBuilderDelegate((context, index) {
-                        return GridTile(
-                          footer: Container(
-                            decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(20),
-                                bottomRight: Radius.circular(20),
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => ProductDetailsScreen(
+                                  productId: products[index].id,
+                                ),
                               ),
-                              color: Colors.black45,
+                            );
+                          },
+                          child: GridTile(
+                            footer: Container(
+                              decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(20),
+                                  bottomRight: Radius.circular(20),
+                                ),
+                                color: Colors.black45,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      products[index].title,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Price: \$${products[index].price}',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    products[index].title,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                  Text(
-                                    'Price: \$${products[index].price}',
-                                    style: const TextStyle(color: Colors.white),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withValues(alpha: 0.1),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 5),
                                   ),
                                 ],
                               ),
-                            ),
-                          ),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withValues(alpha: 0.1),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 5),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Image.network(
+                                  products[index].images[0],
+                                  fit: BoxFit.cover,
                                 ),
-                              ],
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Image.network(
-                                products[index].images[0],
-                                fit: BoxFit.cover,
                               ),
                             ),
                           ),
@@ -286,6 +306,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 return const SliverToBoxAdapter(child: SizedBox.shrink());
               },
             ),
+            BlocBuilder<HomeCubit, HomeState>(
+              builder: ((context, state) {
+                if (state is LoadingMoreProducts) {
+                  return SliverToBoxAdapter(
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return SliverToBoxAdapter(child: SizedBox.shrink());
+              }),
+            ),
+            SliverToBoxAdapter(child: SizedBox(height: 24)),
           ],
         ),
       ),
