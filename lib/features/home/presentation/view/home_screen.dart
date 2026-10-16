@@ -5,6 +5,7 @@ import 'package:ecommerce_app_huma_volve/features/home/presentation/view_model/h
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/dummy_data.dart';
 import '../../../../core/theme.dart';
@@ -237,13 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       delegate: SliverChildBuilderDelegate((context, index) {
                         return GestureDetector(
                           onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => ProductDetailsScreen(
-                                  productId: products[index].id,
-                                ),
-                              ),
-                            );
+                            context.push('/products/${products[index].id}');
                           },
                           child: GridTile(
                             footer: Container(

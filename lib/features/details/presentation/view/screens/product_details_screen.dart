@@ -1,13 +1,13 @@
 import 'package:ecommerce_app_huma_volve/core/theme.dart';
 import 'package:ecommerce_app_huma_volve/features/details/presentation/view/widgets/share_product_button.dart';
-import 'package:ecommerce_app_huma_volve/features/details/presentation/view_model/products_details_cubit.dart';
+import 'package:ecommerce_app_huma_volve/features/details/presentation/view_model/product_details_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/widgets/primary_button.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
-  final int productId; // استقبال الـ ID بدلاً من الكيان كاملاً
+  final int productId;
 
   const ProductDetailsScreen({super.key, required this.productId});
 
@@ -25,7 +25,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     _selectedColor = Colors.black;
     _selectedSize = 'M';
 
-    // جلب البيانات أول ما الصفحة تفتح باستخدام الـ ID القادم من الـ Deep Link أو الـ Router
     context.read<ProductDetailsCubit>().getProductDetails(widget.productId);
   }
 

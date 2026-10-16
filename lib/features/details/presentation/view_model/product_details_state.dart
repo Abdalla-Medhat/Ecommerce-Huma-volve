@@ -1,10 +1,10 @@
-part of 'products_details_cubit.dart';
+part of 'product_details_cubit.dart';
 
-abstract class ProductDetailsState extends Equatable {
+sealed class ProductDetailsState extends Equatable {
   const ProductDetailsState();
 
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
 
 class ProductDetailsInitial extends ProductDetailsState {}
@@ -17,7 +17,7 @@ class ProductDetailsSuccess extends ProductDetailsState {
   const ProductDetailsSuccess(this.product);
 
   @override
-  List<Object?> get props => [product];
+  List<Object> get props => [product];
 }
 
 class ProductDetailsError extends ProductDetailsState {
@@ -26,5 +26,5 @@ class ProductDetailsError extends ProductDetailsState {
   const ProductDetailsError(this.message);
 
   @override
-  List<Object?> get props => [message];
+  List<Object> get props => [message];
 }
