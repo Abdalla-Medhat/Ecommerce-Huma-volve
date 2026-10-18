@@ -17,7 +17,7 @@ class RepositoryImp implements LoginRepository {
       final loginData = await loginRemoteDataSource.login(email, password);
       return Right(loginData as LoginEntity);
     } catch (e) {
-      return Left(ErrorHandler.errorHandler(e.toString()));
+      return Left(ErrorHandler.errorHandler(e));
     }
   }
 }
