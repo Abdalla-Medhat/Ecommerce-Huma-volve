@@ -6,7 +6,8 @@ abstract class ProductDetailsRemoteDataSource {
   Future<HomeProductModel> getProductDetails(int productId);
 }
 
-class ProductDetailsRemoteDataSourceImpl implements ProductDetailsRemoteDataSource {
+class ProductDetailsRemoteDataSourceImpl
+    implements ProductDetailsRemoteDataSource {
   final ApiClient apiClient;
 
   ProductDetailsRemoteDataSourceImpl(this.apiClient);
@@ -14,7 +15,7 @@ class ProductDetailsRemoteDataSourceImpl implements ProductDetailsRemoteDataSour
   @override
   Future<HomeProductModel> getProductDetails(int productId) async {
     final response = await apiClient.dio.get(
-      '${ApiEndpoints.productsEndpoint}/$productId', // أو الرابط المخصص لجلب منتج بالـ ID
+      '${ApiEndpoints.productsEndpoint}/$productId',
     );
     return HomeProductModel.fromJson(response.data);
   }

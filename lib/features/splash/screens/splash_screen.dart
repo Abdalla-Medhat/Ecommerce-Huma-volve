@@ -9,6 +9,7 @@ import 'package:ecommerce_app_huma_volve/features/auth/login/presentation/view_m
 import 'package:ecommerce_app_huma_volve/features/main_navigation/screens/main_navigation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme.dart';
 import '../../auth/login/presentation/view/login_screen.dart';
@@ -21,22 +22,22 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  late final LoginCubit loginCubit;
-  late final LoginUseCase loginUseCase;
-  late final LoginRepository loginRepository;
-  late final LoginRemoteDataSource loginRemoteDataSource;
-  late final ApiClient apiClient;
+  // late final LoginCubit loginCubit;
+  // late final LoginUseCase loginUseCase;
+  // late final LoginRepository loginRepository;
+  // late final LoginRemoteDataSource loginRemoteDataSource;
+  // late final ApiClient apiClient;
   @override
   void initState() {
     super.initState();
-    apiClient = ApiClient();
+    // apiClient = ApiClient();
 
-    loginRemoteDataSource = LoginRemoteDataSourceImp(apiClient);
-    loginRepository = RepositoryImp(
-      loginRemoteDataSource: loginRemoteDataSource,
-    );
-    loginUseCase = LoginUseCase(loginRepository);
-    loginCubit = LoginCubit(loginUseCase);
+    // loginRemoteDataSource = LoginRemoteDataSourceImp(apiClient);
+    // loginRepository = RepositoryImp(
+    //   loginRemoteDataSource: loginRemoteDataSource,
+    // );
+    // loginUseCase = LoginUseCase(loginRepository);
+    // loginCubit = LoginCubit(loginUseCase);
 
     _navigateToNext();
   }
@@ -44,42 +45,64 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _navigateToNext() async {
     await Future.delayed(const Duration(seconds: 2));
 
+    if (!mounted) return;
+
     final accessToken = await SecureStorage.getAccessToken();
     final refreshToken = await SecureStorage.getRefreshToken();
 
-    if (mounted) {
-      if ((accessToken != null && accessToken.isNotEmpty) &&
-          (refreshToken != null && refreshToken.isNotEmpty)) {
-        Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                const MainNavigationScreen(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
-          ),
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                BlocProvider(
-                  create: (context) => loginCubit,
-                  child: const LoginScreen(),
-                ),
+    if (!mounted) return;
 
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
-          ),
-        );
-      }
+    final isLoggedIn =
+        accessToken != null &&
+        accessToken.isNotEmpty &&
+        refreshToken != null &&
+        refreshToken.isNotEmpty;
+
+    if (isLoggedIn) {
+      context.go('/main');
+    } else {
+      context.go('/login');
     }
   }
+  // Future<void> _navigateToNext() async {
+  //   await Future.delayed(const Duration(seconds: 2));
+
+  //   final accessToken = await SecureStorage.getAccessToken();
+  //   final refreshToken = await SecureStorage.getRefreshToken();
+
+  //   if (mounted) {
+  //     if ((accessToken != null && accessToken.isNotEmpty) &&
+  //         (refreshToken != null && refreshToken.isNotEmpty)) {
+  //       Navigator.pushReplacement(
+  //         context,
+  //         PageRouteBuilder(
+  //           pageBuilder: (context, animation, secondaryAnimation) =>
+  //               const MainNavigationScreen(),
+  //           transitionsBuilder:
+  //               (context, animation, secondaryAnimation, child) {
+  //                 return FadeTransition(opacity: animation, child: child);
+  //               },
+  //         ),
+  //       );
+  //     } else {
+  //       Navigator.pushReplacement(
+  //         context,
+  //         PageRouteBuilder(
+  //           pageBuilder: (context, animation, secondaryAnimation) =>
+  //               BlocProvider(
+  //                 create: (context) => loginCubit,
+  //                 child: const LoginScreen(),
+  //               ),
+
+  //           transitionsBuilder:
+  //               (context, animation, secondaryAnimation, child) {
+  //                 return FadeTransition(opacity: animation, child: child);
+  //               },
+  //         ),
+  //       );
+  //     }
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {

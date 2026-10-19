@@ -1,6 +1,4 @@
-import 'package:ecommerce_app_huma_volve/features/details/presentation/view/screens/product_details_screen.dart';
 import 'package:ecommerce_app_huma_volve/features/home/domain/entites/home_category_entity.dart';
-import 'package:ecommerce_app_huma_volve/features/home/domain/entites/home_product_entity.dart';
 import 'package:ecommerce_app_huma_volve/features/home/presentation/view_model/home_cubit.dart';
 
 import 'package:flutter/material.dart';
@@ -142,16 +140,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 32),
                     BlocBuilder<HomeCubit, HomeState>(
                       buildWhen: (previous, current) {
-                        return current is CategoriesLoading ||
-                            current is CategoriesSuccess ||
+                        return current is CategoriesSuccess ||
                             current is CategoriesError;
                       },
                       builder: (context, state) {
-                        if (state is CategoriesLoading) {
-                          return Center(
-                            child: const CircularProgressIndicator(),
-                          );
-                        } else if (state is CategoriesError) {
+                        if (state is CategoriesError) {
                           return Center(child: Text(state.message));
                         } else if (state is CategoriesSuccess) {
                           final List<HomeCategoryEntity> categories =
@@ -201,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? state.products
                     : context.read<HomeCubit>().products;
 
-                if (state is ProductsLoading && products.isEmpty) {
+                if (state is ProductsLoading || products.isEmpty) {
                   return const SliverToBoxAdapter(
                     child: Padding(
                       padding: EdgeInsets.all(50),
@@ -224,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 }
 
-                if (products.isNotEmpty) {
+                if (products.isNotEmpty || state is ProductsSuccess) {
                   return SliverPadding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     sliver: SliverGrid(
@@ -238,7 +231,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       delegate: SliverChildBuilderDelegate((context, index) {
                         return GestureDetector(
                           onTap: () {
-                            context.push('/products/${products[index].id}');
+                            final productId = products[index].id;
+
+                            debugPrint(
+                              '➡️ Opening product details: $productId',
+                            );
+
+                            context.push('/products/$productId');
                           },
                           child: GridTile(
                             footer: Container(

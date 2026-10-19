@@ -1,8 +1,10 @@
 import 'package:ecommerce_app_huma_volve/core/theme.dart';
 import 'package:ecommerce_app_huma_volve/features/details/presentation/view/widgets/share_product_button.dart';
 import 'package:ecommerce_app_huma_volve/features/details/presentation/view_model/product_details_cubit.dart';
+import 'package:ecommerce_app_huma_volve/features/favorites.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../../core/widgets/primary_button.dart';
 
@@ -18,14 +20,18 @@ class ProductDetailsScreen extends StatefulWidget {
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   late Color _selectedColor;
   late String _selectedSize;
-
   @override
   void initState() {
     super.initState();
     _selectedColor = Colors.black;
     _selectedSize = 'M';
+    debugPrint('🟢 ProductDetailsScreen INIT');
+  }
 
-    context.read<ProductDetailsCubit>().getProductDetails(widget.productId);
+  @override
+  void dispose() {
+    debugPrint('🔴 ProductDetailsScreen DISPOSE');
+    super.dispose();
   }
 
   @override
@@ -66,7 +72,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       ),
                       child: const Icon(Icons.arrow_back_ios_new, size: 16),
                     ),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () {
+                      debugPrint('⬅️ Back button pressed');
+                      context.pop();
+                    },
                   ),
                   actions: [
                     ShareProductButton(productId: widget.productId.toString()),
@@ -79,7 +88,26 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         ),
                         child: const Icon(Icons.favorite_border, size: 18),
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) {
+                              final FavoriteItem favoriteItem = FavoriteItem(
+                                id: product.id.toString(),
+                                title: product.title,
+                                subtitle: product.slug,
+                                imageUrl: product.images.isNotEmpty
+                                    ? product.images[0]
+                                    : '',
+                                price: product.price.toDouble(),
+                              );
+                              return FavoritesScreen(
+                                initialItems: [favoriteItem],
+                              );
+                            },
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(width: 8),
                   ],

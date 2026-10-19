@@ -1,5 +1,6 @@
 import 'package:ecommerce_app_huma_volve/core/storage/secure_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/dummy_data.dart';
 import '../../../core/theme.dart';
@@ -94,28 +95,29 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () async {
                       await SecureStorage.deleteTokens();
                       if (context.mounted) {
-                        Navigator.pushReplacement(
-                          context,
-                          PageRouteBuilder(
-                            pageBuilder: (
-                              context,
-                              animation,
-                              secondaryAnimation,
-                            ) => const LoginScreen(),
-                            transitionsBuilder:
-                                (
-                                  context,
-                                  animation,
-                                  secondaryAnimation,
-                                  child,
-                                ) {
-                                  return FadeTransition(
-                                    opacity: animation,
-                                    child: child,
-                                  );
-                                },
-                          ),
-                        );
+                        // Navigator.pushReplacement(
+                        //   context,
+                        //   PageRouteBuilder(
+                        //     pageBuilder: (
+                        //       context,
+                        //       animation,
+                        //       secondaryAnimation,
+                        //     ) => const LoginScreen(),
+                        //     transitionsBuilder:
+                        //         (
+                        //           context,
+                        //           animation,
+                        //           secondaryAnimation,
+                        //           child,
+                        //         ) {
+                        //           return FadeTransition(
+                        //             opacity: animation,
+                        //             child: child,
+                        //           );
+                        //         },
+                        //   ),
+                        // );
+                        context.go('/login');
                       }
                     },
                   ),

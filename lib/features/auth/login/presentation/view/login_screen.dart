@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:ecommerce_app_huma_volve/core/network/api_client.dart';
 import 'package:ecommerce_app_huma_volve/features/auth/login/data/data_source/login_remote_data_source_imp.dart';
 import 'package:ecommerce_app_huma_volve/features/auth/login/data/repository/repository_imp.dart';
@@ -6,6 +5,7 @@ import 'package:ecommerce_app_huma_volve/features/auth/login/domain/use_cases/lo
 import 'package:ecommerce_app_huma_volve/features/auth/login/presentation/view_model/login_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../../core/widgets/custom_text_field.dart';
 import '../../../../../core/widgets/primary_button.dart';
@@ -140,11 +140,12 @@ class _LoginScreenBodyState extends State<LoginScreenBody> {
                       );
                     }
                     if (state is LoginSuccess) {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => const MainNavigationScreen(),
-                        ),
-                      );
+                      context.go('/main');
+                      // Navigator.of(context).pushReplacement(
+                      //   MaterialPageRoute(
+                      //     builder: (context) => const MainNavigationScreen(),
+                      //   ),
+                      // );
                     }
                   },
                   builder: (context, state) {
@@ -170,28 +171,29 @@ class _LoginScreenBodyState extends State<LoginScreenBody> {
                     const Text('Don\'t have an account? '),
                     GestureDetector(
                       onTap: () {
-                        Navigator.pushReplacement(
-                          context,
-                          PageRouteBuilder(
-                            pageBuilder: (
-                              context,
-                              animation,
-                              secondaryAnimation,
-                            ) => const SignUpScreen(),
-                            transitionsBuilder:
-                                (
-                                  context,
-                                  animation,
-                                  secondaryAnimation,
-                                  child,
-                                ) {
-                                  return FadeTransition(
-                                    opacity: animation,
-                                    child: child,
-                                  );
-                                },
-                          ),
-                        );
+                        // Navigator.pushReplacement(
+                        //   context,
+                        //   PageRouteBuilder(
+                        //     pageBuilder: (
+                        //       context,
+                        //       animation,
+                        //       secondaryAnimation,
+                        //     ) => const SignUpScreen(),
+                        //     transitionsBuilder:
+                        //         (
+                        //           context,
+                        //           animation,
+                        //           secondaryAnimation,
+                        //           child,
+                        //         ) {
+                        //           return FadeTransition(
+                        //             opacity: animation,
+                        //             child: child,
+                        //           );
+                        //         },
+                        //   ),
+                        // );
+                        context.go('/signup');
                       },
                       child: Text(
                         'Sign Up',
