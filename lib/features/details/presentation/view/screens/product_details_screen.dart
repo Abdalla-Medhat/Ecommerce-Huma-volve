@@ -1,10 +1,12 @@
 import 'package:ecommerce_app_huma_volve/core/theme.dart';
 import 'package:ecommerce_app_huma_volve/features/details/presentation/view/widgets/share_product_button.dart';
 import 'package:ecommerce_app_huma_volve/features/details/presentation/view_model/product_details_cubit.dart';
-import 'package:ecommerce_app_huma_volve/features/favorites.dart';
+import 'package:ecommerce_app_huma_volve/features/profile/presentation/view/favorites.dart';
+import 'package:ecommerce_app_huma_volve/features/home/domain/entites/home_product_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../../core/widgets/primary_button.dart';
 
@@ -18,19 +20,17 @@ class ProductDetailsScreen extends StatefulWidget {
 }
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
-  late Color _selectedColor;
-  late String _selectedSize;
+  late final prefs;
+  late bool isClicked;
   @override
   void initState() {
+    prefs = SharedPreferences.getInstance();
+    isClicked = false;
     super.initState();
-    _selectedColor = Colors.black;
-    _selectedSize = 'M';
-    debugPrint('🟢 ProductDetailsScreen INIT');
   }
 
   @override
   void dispose() {
-    debugPrint('🔴 ProductDetailsScreen DISPOSE');
     super.dispose();
   }
 
@@ -39,6 +39,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: BlocBuilder<ProductDetailsCubit, ProductDetailsState>(
+        buildWhen: (previous, current) {
+          return current is ProductDetailsLoading ||
+              current is ProductDetailsError ||
+              current is ProductDetailsSuccess;
+        },
         builder: (context, state) {
           if (state is ProductDetailsLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -73,7 +78,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       child: const Icon(Icons.arrow_back_ios_new, size: 16),
                     ),
                     onPressed: () {
-                      debugPrint('⬅️ Back button pressed');
                       context.pop();
                     },
                   ),
@@ -86,27 +90,60 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           color: Colors.white.withValues(alpha: 0.9),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.favorite_border, size: 18),
+                        child:
+                            BlocBuilder<
+                              ProductDetailsCubit,
+                              ProductDetailsState
+                            >(
+                              builder: (context, state) {
+                                if (state is ProductDetailsSuccess) {
+                                  return Icon(
+                                    state.isFavorite
+                                        ? Icons.favorite
+                                        : Icons.favorite_border,
+
+                                    size: 16,
+                                    color: state.isFavorite
+                                        ? Colors.red
+                                        : Colors.grey,
+                                  );
+                                }
+                                return SizedBox.shrink();
+                              },
+                            ),
                       ),
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) {
-                              final FavoriteItem favoriteItem = FavoriteItem(
-                                id: product.id.toString(),
-                                title: product.title,
-                                subtitle: product.slug,
-                                imageUrl: product.images.isNotEmpty
-                                    ? product.images[0]
-                                    : '',
-                                price: product.price.toDouble(),
-                              );
-                              return FavoritesScreen(
-                                initialItems: [favoriteItem],
-                              );
-                            },
-                          ),
+                      onPressed: () async {
+                        debugPrint('========>Favorite Button Pressed');
+                        debugPrint(
+                          "Is favorite status before click: ${state.isFavorite}",
                         );
+                        if (state.isFavorite == false) {
+                          await context
+                              .read<ProductDetailsCubit>()
+                              .saveFavoriteProduct(product);
+                        } else {
+                          await context
+                              .read<ProductDetailsCubit>()
+                              .deleteFavoriteProduct(product);
+                        }
+                        // Navigator.of(context).push(
+                        //   MaterialPageRoute(
+                        //     builder: (context) {
+                        //       final FavoriteItem favoriteItem = FavoriteItem(
+                        //         id: product.id.toString(),
+                        //         title: product.title,
+                        //         subtitle: product.slug,
+                        //         imageUrl: product.images.isNotEmpty
+                        //             ? product.images[0]
+                        //             : '',
+                        //         price: product.price.toDouble(),
+                        //       );
+                        //       return FavoritesScreen(
+                        //         initialItems: [favoriteItem],
+                        //       );
+                        //     },
+                        //   ),
+                        // );
                       },
                     ),
                     const SizedBox(width: 8),
@@ -175,7 +212,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           const SizedBox(height: 32),
                           PrimaryButton(
                             text: 'Add to Cart',
-                            onPressed: () {
+                            onPressed: () async {
+                              // await context
+                              //     .read<ProductDetailsCubit>()
+                              //     .deleteAll();
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(

@@ -2,10 +2,9 @@ import 'package:ecommerce_app_huma_volve/core/storage/secure_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/dummy_data.dart';
-import '../../../core/theme.dart';
-import '../widgets/profile_menu_item.dart';
-import '../../auth/login/presentation/view/login_screen.dart';
+import '../../../../core/dummy_data.dart';
+import '../../../../core/theme.dart';
+import '../../widgets/profile_menu_item.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -70,7 +69,9 @@ class ProfileScreen extends StatelessWidget {
                   ProfileMenuItem(
                     icon: Icons.favorite_border,
                     title: 'Wishlist',
-                    onTap: () {},
+                    onTap: () {
+                      context.push('/favorite');
+                    },
                   ),
                   ProfileMenuItem(
                     icon: Icons.location_on_outlined,
@@ -95,28 +96,6 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () async {
                       await SecureStorage.deleteTokens();
                       if (context.mounted) {
-                        // Navigator.pushReplacement(
-                        //   context,
-                        //   PageRouteBuilder(
-                        //     pageBuilder: (
-                        //       context,
-                        //       animation,
-                        //       secondaryAnimation,
-                        //     ) => const LoginScreen(),
-                        //     transitionsBuilder:
-                        //         (
-                        //           context,
-                        //           animation,
-                        //           secondaryAnimation,
-                        //           child,
-                        //         ) {
-                        //           return FadeTransition(
-                        //             opacity: animation,
-                        //             child: child,
-                        //           );
-                        //         },
-                        //   ),
-                        // );
                         context.go('/login');
                       }
                     },

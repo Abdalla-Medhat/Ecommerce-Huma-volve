@@ -8,7 +8,9 @@ import 'package:ecommerce_app_huma_volve/features/details/domain/use_cases/get_p
 import 'package:ecommerce_app_huma_volve/features/details/presentation/view/screens/product_details_screen.dart';
 import 'package:ecommerce_app_huma_volve/features/details/presentation/view_model/product_details_cubit.dart';
 import 'package:ecommerce_app_huma_volve/features/main_navigation/screens/main_navigation_screen.dart';
-import 'package:ecommerce_app_huma_volve/features/profile/screens/profile_screen.dart';
+import 'package:ecommerce_app_huma_volve/features/profile/presentation/view/favorites.dart';
+import 'package:ecommerce_app_huma_volve/features/profile/presentation/view/profile_screen.dart';
+import 'package:ecommerce_app_huma_volve/features/profile/presentation/view_model/favorite_cubit.dart';
 import 'package:ecommerce_app_huma_volve/features/splash/screens/splash_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -48,6 +50,18 @@ final appRouting = GoRouter(
     GoRoute(
       path: "/profile",
       builder: (context, state) => const ProfileScreen(),
+    ),
+
+    GoRoute(
+      path: "/favorite",
+      builder: (context, state) {
+        return BlocProvider(
+          create: (context) {
+            return FavoriteCubit();
+          },
+          child: FavoritesScreen(),
+        );
+      },
     ),
   ],
 );

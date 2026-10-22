@@ -12,7 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/theme.dart';
 import '../../home/presentation/view/home_screen.dart';
 import '../../cart/screens/cart_screen.dart';
-import '../../profile/screens/profile_screen.dart';
+import '../../profile/presentation/view/profile_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});

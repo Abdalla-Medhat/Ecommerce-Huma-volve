@@ -1,39 +1,22 @@
+import 'package:ecommerce_app_huma_volve/features/profile/data/view_model/favorite_modle.dart';
+import 'package:ecommerce_app_huma_volve/features/profile/presentation/view_model/favorite_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/theme.dart';
-
-class FavoriteItem {
-  final String id;
-  final String title;
-  final String subtitle;
-  final String imageUrl;
-  final double price;
-
-  const FavoriteItem({
-    required this.id,
-    required this.title,
-    required this.subtitle,
-    required this.imageUrl,
-    required this.price,
-  });
-}
+import '../../../../../../core/theme.dart';
 
 class FavoritesScreen extends StatefulWidget {
-  final List<FavoriteItem> initialItems;
-
-  const FavoritesScreen({super.key, required this.initialItems});
+  const FavoritesScreen({super.key});
 
   @override
   State<FavoritesScreen> createState() => _FavoritesScreenState();
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
-  late List<FavoriteItem> _favorites;
-
   @override
   void initState() {
     super.initState();
-    _favorites = List.from(widget.initialItems);
+    context.read<FavoriteCubit>().getFavoritesItems();
   }
 
   @override
@@ -54,8 +37,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         ),
         iconTheme: const IconThemeData(color: Colors.black87),
       ),
-      body: _favorites.isEmpty
-          ? Center(
+      body: BlocBuilder<FavoriteCubit, FavoriteState>(
+        builder: (context, state) {
+          if (state is FavoriteLoading) {
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -65,14 +50,15 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     color: Colors.grey.shade400,
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    'Your wishlist is empty',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
+                  // Text(
+                  //   'Your wishlist is empty',
+                  //   style: TextStyle(
+                  //     fontSize: 18,
+                  //     fontWeight: FontWeight.w600,
+                  //     color: Colors.grey.shade600,
+                  //   ),
+                  // ),
+                  Center(child: CircularProgressIndicator()),
                   const SizedBox(height: 8),
                   Text(
                     'Save items you love to find them easily later.',
@@ -80,14 +66,29 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   ),
                 ],
               ),
-            )
-          : ListView.builder(
+            );
+          }
+          if (state is FavoriteEmpty) {
+            return Center(
+              child: Text(
+                'Your wishlist is empty',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            );
+          }
+          if (state is FavoriteSuccess) {
+            List<FavoriteItem> favorites = state.faveItem;
+            return ListView.builder(
               padding: const EdgeInsets.all(24),
-              itemCount: _favorites.length,
+              itemCount: favorites.length,
               itemBuilder: (context, index) {
-                final item = _favorites[index];
+                final item = favorites[index];
                 return Dismissible(
-                  key: Key(item.id),
+                  key: Key(favorites[index].id.toString()),
                   direction: DismissDirection.endToStart,
                   background: Container(
                     alignment: Alignment.centerRight,
@@ -99,23 +100,13 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     ),
                     child: const Icon(Icons.delete, color: Colors.white),
                   ),
-                  onDismissed: (direction) {
-                    setState(() {
-                      _favorites.removeAt(index);
-                    });
+                  onDismissed: (direction) async {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('${item.title} removed from wishlist'),
-                        action: SnackBarAction(
-                          label: 'Undo',
-                          onPressed: () {
-                            setState(() {
-                              _favorites.insert(index, item);
-                            });
-                          },
-                        ),
                       ),
                     );
+                    await context.read<FavoriteCubit>().deleteItem(item.id!);
                   },
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 16),
@@ -136,7 +127,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: Image.network(
-                            item.imageUrl,
+                            item.imageUrl!,
                             width: 80,
                             height: 80,
                             fit: BoxFit.cover,
@@ -155,7 +146,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                item.title,
+                                item.title!,
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -165,7 +156,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                item.subtitle,
+                                item.subtitle!,
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.grey.shade600,
@@ -175,7 +166,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                '\$${item.price.toStringAsFixed(2)}',
+                                '\$${item.price!.toStringAsFixed(2)}',
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -189,7 +180,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                           icon: const Icon(Icons.favorite, color: Colors.red),
                           onPressed: () {
                             setState(() {
-                              _favorites.removeAt(index);
+                              context.read<FavoriteCubit>().deleteItem(
+                                item.id!,
+                              );
                             });
                           },
                         ),
@@ -198,7 +191,23 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   ),
                 );
               },
-            ),
+            );
+          }
+          if (state is FavoriteError) {
+            return Text(
+              textAlign: TextAlign.center,
+              'Something went wrong: ${state.message}',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade600,
+              ),
+            );
+          } else {
+            return SizedBox.shrink();
+          }
+        },
+      ),
     );
   }
 }
